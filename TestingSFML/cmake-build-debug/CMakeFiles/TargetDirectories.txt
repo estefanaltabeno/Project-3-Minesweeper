@@ -1,0 +1,3 @@
+C:/Users/chess/CLionProjects/TestingSFML/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/chess/CLionProjects/TestingSFML/cmake-build-debug/CMakeFiles/Minesweeper.dir
+C:/Users/chess/CLionProjects/TestingSFML/cmake-build-debug/CMakeFiles/edit_cache.dir
