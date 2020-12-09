@@ -178,6 +178,122 @@ int SearchForFlag(Board& board, vector<int>& indexes, vector<Sprite>& flags)
 
 //Don't need this anymore
 
+
+void SetProxNumbers(Board& board, int width, int height)
+{
+    width++;
+
+    height++;
+
+    int count = 0;
+
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            count = 0;
+
+            for (auto & adjacentTile : board.Tiles.at(i).at(j).adjacentTiles)
+            {
+                if (adjacentTile == nullptr)
+                {
+
+                }
+                else
+                {
+                    if (adjacentTile->hasMine)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            board.Tiles.at(i).at(j).proxMines = count;
+        }
+    }
+
+}
+
+/*
+bool RevealingLoop(Board& board, Tile tile, vector<Sprite>& proxNumSprites, Texture& revealedTile, Texture& numOne, Texture& numTwo, Texture& numThree, Texture& numFour, Texture& numFive, Texture& numSix, Texture& numSeven, Texture& numEight)
+{
+    vector<int> indexes;
+
+    vector<Tile> tiles;
+
+    tiles.push_back(tile);
+
+    Sprite temp;
+
+    bool changeTile = false;
+
+    for (int i = 0; i < tiles.size(); i++)
+    {
+        Tile tileTemp = tiles.at(i);
+
+        for (int j = 0; j < tileTemp.adjacentTiles.size(); j++)
+        {
+            if (tileTemp.adjacentTiles.at(j) == nullptr)
+            {
+
+            }
+
+            else
+            {
+                indexes = SearchForTile(board, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().x, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().y);
+
+                setTextures(board, revealedTile, indexes);
+
+                switch(tileTemp.adjacentTiles.at(j)->proxMines)
+                {
+                    case 0:
+                        changeTile = true;
+                        break;
+                    case 1:
+                        temp = setTextures(board, indexes, numOne);
+                        break;
+                    case 2:
+                        temp = setTextures(board, indexes, numTwo);
+                        break;
+                    case 3:
+                        temp = setTextures(board, indexes, numThree);
+                        break;
+                    case 4:
+                        temp = setTextures(board, indexes, numFour);
+                        break;
+                    case 5:
+                        temp = setTextures(board, indexes, numFive);
+                        break;
+                    case 6:
+                        temp = setTextures(board, indexes, numSix);
+                        break;
+                    case 7:
+                        temp = setTextures(board, indexes, numSeven);
+                        break;
+                    case 8:
+                        temp = setTextures(board, indexes, numEight);
+                        break;
+                }
+
+                proxNumSprites.push_back(temp);
+            }
+        }
+    }
+
+
+    if (changeTile)
+    {
+
+        RevealingLoop(board, )
+    }
+
+    else
+    {
+        return false;
+    }
+}
+*/
+
 int main()
 {
     //Reading in Data
@@ -335,6 +451,8 @@ int main()
 
     testThree.setPosition(width - 64, height - 88);
 
+    /*
+
     Sprite numOneSprite;
 
     numOneSprite.setTexture(numOne);
@@ -368,6 +486,8 @@ int main()
     numEightSprite.setTexture(numEight);
 
 
+    */
+
     //Lots of texture and sprites here
 
     float x_pos = 0;
@@ -385,6 +505,14 @@ int main()
             board.Tiles.at(i).at(j).tileSprite.setTexture(tile);
 
             board.Tiles.at(i).at(j).tileSprite.setPosition(x_pos, y_pos);
+
+            board.Tiles.at(i).at(j).x_pos = x_pos;
+
+            board.Tiles.at(i).at(j).y_pos = y_pos;
+
+            //cout << i << " i and j " << j << endl;
+
+            //cout << "Positions " << x_pos << " x and y " << y_pos << endl;
 
             Tile* behind;
 
@@ -609,7 +737,6 @@ int main()
 
     //Working through the board's Tiles vector and setting the positions of each to make sense. Also doing it here to avoid issues with the texture pointers and whatnot
 
-    vector<int> tempIndexes;
 
     bool check = false;
 
@@ -621,11 +748,27 @@ int main()
 
     Sprite temp;
 
+    Tile tempTile;
+
+    vector<int> tempIndexes;
+
     vector<Sprite> flagSprites;
 
     vector<Sprite> mineSprites;
 
+    vector<Sprite> proxNumSprites;
+
+    vector<int> indexess;
+
+    vector<Tile> tilesWith0Prox;
+
+    bool keepGoing = true;
+
     SetRandomMines(board, height, width, mineCount);
+
+    //WORKING ON THIS SETTING THE NUMBERS AND THEIR PROXIMITY TO THE MINES THAT I SET WITH THE FUNCTION PRIOR
+
+    SetProxNumbers(board, widthCalc, heightCalc);
 
     while(window.isOpen())
     {
@@ -667,6 +810,8 @@ int main()
 
                         if (board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasFlag)
                         {
+                            //Do nothing
+
                             //int index = SearchForFlag(board, tempIndexes, flagSprites); Don't need this anymore
 
                             //setTextures(board, revealedTile, tempIndexes);
@@ -678,6 +823,8 @@ int main()
                         {
                             setTextures(board, revealedTile, tempIndexes);
 
+                            board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).isRevealed = true;
+
                             if (board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasMine)
                             {
                                 temp = setTextures(board, tempIndexes, mine);
@@ -685,6 +832,158 @@ int main()
                                 mineSprites.push_back(temp);
 
                                 printMine = true;
+                            }
+
+                            else
+                            {
+                                tilesWith0Prox.clear();
+
+                                int countMine = board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).proxMines;
+
+                                tilesWith0Prox.push_back(board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)));
+
+                                //using if/else instead of switch since while loop is acting funny in switch statement
+
+                                //cout << board.Tiles.at(0).at(5).tileSprite.getPosition().x << "  " << board.Tiles.at(0).at(5).tileSprite.getPosition().y << endl;
+
+                                if (countMine == 0)
+                                {
+                                    int sizeCount = 1;
+
+                                    for (int i = 0; i < sizeCount; i++)
+                                    {
+                                        cout << "New one " << endl;
+
+                                        cout << tilesWith0Prox.at(i).tileNum << endl;
+
+                                        for (int j = 0; j < tilesWith0Prox.at(i).adjacentTiles.size(); j++)
+                                        {
+                                            if (tilesWith0Prox.at(i).adjacentTiles.at(j) == nullptr)
+                                            {
+                                                continue;
+                                            }
+
+                                            else if (tilesWith0Prox.at(i).adjacentTiles.at(j)->isRevealed)
+                                            {
+                                                continue;
+                                            }
+
+                                            else
+                                            {
+                                                indexess = SearchForTile(board, tilesWith0Prox.at(i).adjacentTiles.at(j)->tileSprite.getPosition().x, tilesWith0Prox.at(i).adjacentTiles.at(j)->tileSprite.getPosition().y);
+
+                                                setTextures(board, revealedTile, indexess);
+
+                                                board.Tiles.at(indexess.at(0)).at(indexess.at(1)).isRevealed = true;
+
+                                                int proxMines = tilesWith0Prox.at(i).adjacentTiles.at(j)->proxMines;
+
+                                                if (proxMines == 0)
+                                                {
+                                                    cout << indexess.at(0) << " 0 and 1 " << indexess.at(1) << endl;
+
+                                                    tilesWith0Prox.push_back(board.Tiles.at(indexess.at(0)).at(indexess.at(1)));
+
+                                                    sizeCount++;
+                                                }
+
+                                                else if (proxMines == 1)
+                                                {
+                                                    temp = setTextures(board, indexess, numOne);
+
+                                                }
+
+                                                else if (proxMines == 2)
+                                                {
+                                                    temp = setTextures(board, indexess, numTwo);
+
+                                                }
+
+                                                else if (proxMines == 3)
+                                                {
+                                                    temp = setTextures(board, indexess, numThree);
+
+                                                }
+
+                                                else if (proxMines == 4)
+                                                {
+                                                    temp = setTextures(board, indexess, numFour);
+
+                                                }
+
+                                                else if (proxMines == 5)
+                                                {
+                                                    temp = setTextures(board, indexess, numFive);
+
+                                                }
+
+                                                else if (proxMines == 6)
+                                                {
+                                                    temp = setTextures(board, indexess, numSix);
+
+                                                }
+
+                                                else if (proxMines == 7)
+                                                {
+                                                    temp = setTextures(board, indexess, numSeven);
+
+                                                }
+
+                                                else if (proxMines == 8)
+                                                {
+                                                    temp = setTextures(board, indexess, numEight);
+
+                                                }
+
+                                            }
+                                            proxNumSprites.push_back(temp);
+                                        }
+
+                                        //tilesWith0Prox.erase(tilesWith0Prox.begin());
+                                    }
+                                }
+
+                                else if (countMine == 1)
+                                {
+                                    temp = setTextures(board, tempIndexes, numOne);
+                                }
+
+                                else if (countMine == 2)
+                                {
+                                    temp = setTextures(board, tempIndexes, numTwo);
+                                }
+
+                                else if (countMine == 3)
+                                {
+                                    temp = setTextures(board, tempIndexes, numThree);
+                                }
+
+                                else if (countMine == 4)
+                                {
+                                    temp = setTextures(board, tempIndexes, numFour);
+                                }
+
+                                else if (countMine == 5)
+                                {
+                                    temp = setTextures(board, tempIndexes, numFive);
+                                }
+
+                                else if (countMine == 6)
+                                {
+                                    temp = setTextures(board, tempIndexes, numSix);
+                                }
+
+                                else if (countMine == 7)
+                                {
+                                    temp = setTextures(board, tempIndexes, numSeven);
+                                }
+
+                                else if (countMine == 8)
+                                {
+                                    temp = setTextures(board, tempIndexes, numEight);
+                                }
+
+                                proxNumSprites.push_back(temp);
                             }
                         }
                     }
@@ -742,15 +1041,172 @@ int main()
                 window.draw(smileySprite);
             }
 
+            for (const auto& x : proxNumSprites)
+            {
+                window.draw(x);
+            }
+
             window.display();
         }
 
     }
 
     return 0;
-
 }
 
+/*
+
+                                if (countMine == 0)
+                                {
+                                    for (int i = 0; i < tilesWith0Prox.size(); i++)
+                                    {
+                                        cout << "Starting the loop " << endl;
+
+                                        exitCall = false;
+
+                                        Tile x = tilesWith0Prox.at(i);
+
+                                        for (int j = 0; j < x.adjacentTiles.size(); j++)
+                                        {
+                                            if (x.adjacentTiles.at(j) == nullptr)
+                                            {
+                                                continue;
+                                            }
+
+                                            else
+                                            {
+                                                indexess = SearchForTile(board, x.adjacentTiles.at(j)->tileSprite.getPosition().x, x.adjacentTiles.at(j)->tileSprite.getPosition().y);
+
+                                                setTextures(board, revealedTile, indexess);
+
+                                                switch(x.adjacentTiles.at(j)->proxMines)
+                                                {
+                                                    case 0:
+                                                        tempTile = board.Tiles.at(indexess.at(0)).at(indexess.at(1));
+
+                                                        tilesWith0Prox.push_back(tempTile);
+
+                                                        exitCall = true;
+                                                        break;
+                                                    case 1:
+                                                        temp = setTextures(board, indexess, numOne);
+                                                        break;
+                                                    case 2:
+                                                        temp = setTextures(board, indexess, numTwo);
+                                                        break;
+                                                    case 3:
+                                                        temp = setTextures(board, indexess, numThree);
+                                                        break;
+                                                    case 4:
+                                                        temp = setTextures(board, indexess, numFour);
+                                                        break;
+                                                    case 5:
+                                                        temp = setTextures(board, indexess, numFive);
+                                                        break;
+                                                    case 6:
+                                                        temp = setTextures(board, indexess, numSix);
+                                                        break;
+                                                    case 7:
+                                                        temp = setTextures(board, indexess, numSeven);
+                                                        break;
+                                                    case 8:
+                                                        temp = setTextures(board, indexess, numEight);
+                                                        break;
+                                                }
+                                            }
+
+                                                proxNumSprites.push_back(temp);
+                                        }
+
+                                        if (exitCall)
+                                        {
+                                            continue;
+                                        }
+
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                else if (countMine == 1)
+                                {
+                                    temp = setTextures(board, tempIndexes, numOne);
+                                }
+
+                                else if (countMine == 2)
+                                {
+                                    temp = setTextures(board, tempIndexes, numTwo);
+                                }
+
+                                else if (countMine == 3)
+                                {
+                                    temp = setTextures(board, tempIndexes, numThree);
+                                }
+
+                                else if (countMine == 4)
+                                {
+                                    temp = setTextures(board, tempIndexes, numFour);
+                                }
+
+                                else if (countMine == 5)
+                                {
+                                    temp = setTextures(board, tempIndexes, numFive);
+                                }
+
+                                else if (countMine == 6)
+                                {
+                                    temp = setTextures(board, tempIndexes, numSix);
+                                }
+
+                                else if (countMine == 7)
+                                {
+                                    temp = setTextures(board, tempIndexes, numSeven);
+                                }
+
+                                else if (countMine == 8)
+                                {
+                                    temp = setTextures(board, tempIndexes, numEight);
+                                }
+
+                                proxNumSprites.push_back(temp);
+
+                                 */
+
+
+/*
+for (auto& x : board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).adjacentTiles)
+{
+    if (x == nullptr)
+    {
+
+    }
+
+    else
+    {
+        if (x->proxMines == 0)
+        {
+            Tile
+            anyLeftZero = true;
+        }
+
+        indexess = SearchForTile(board, x->tileSprite.getPosition().x, x->tileSprite.getPosition().y);
+
+        setTextures(board, revealedTile, indexess);
+    }
+}
+
+if (anyLeftZero)
+{
+    continue;
+}
+
+else
+{
+    break;
+}
+ */
 
 //Moved this trial out of the way for now
 /*
@@ -778,6 +1234,81 @@ int main()
        }
    }
    */
+
+
+/*
+switch (countMine)
+{
+    case 0:
+
+        bool anyLeftZero = false;
+
+        while (true)
+        {
+            for (auto& x : board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).adjacentTiles)
+            {
+                if (x == nullptr)
+                {
+
+                }
+
+                else
+                {
+                    if (x->proxMines == 0)
+                    {
+                        anyLeftZero = true;
+                    }
+
+                    indexess = SearchForTile(board, x->tileSprite.getPosition().x, x->tileSprite.getPosition().y);
+
+                    setTextures(board, revealedTile, indexess);
+                }
+            }
+
+            if (anyLeftZero)
+            {
+                continue;
+            }
+
+            else
+            {
+                break;
+            }
+        }
+
+
+
+        break;
+
+    case 1:
+        temp = setTextures(board, tempIndexes, numOne);
+        break;
+    case 2:
+        temp = setTextures(board, tempIndexes, numTwo);
+        break;
+    case 3:
+        temp = setTextures(board, tempIndexes, numThree);
+        break;
+    case 4:
+        temp = setTextures(board, tempIndexes, numFour);
+        break;
+    case 5:
+        temp = setTextures(board, tempIndexes, numFive);
+        break;
+    case 6:
+        temp = setTextures(board, tempIndexes, numSix);
+        break;
+    case 7:
+        temp = setTextures(board, tempIndexes, numSeven);
+        break;
+    case 8:
+        temp = setTextures(board, tempIndexes, numEight);
+        break;
+    default:
+        break;
+}
+
+*/
 
 /*
 int main()

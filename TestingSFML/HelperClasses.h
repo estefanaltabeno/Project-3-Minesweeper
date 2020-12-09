@@ -32,9 +32,19 @@ class Tile
 
 public:
 
+    int proxMines;
+
     bool hasMine;
 
     bool hasFlag;
+
+    bool isRevealed;
+
+    float x_pos;
+
+    float y_pos;
+
+    int tileNum;
 
     vector<Tile*> adjacentTiles; //Thank you Professor Fox!
 
@@ -42,13 +52,47 @@ public:
 
     Tile();
 
+    Tile& operator=(const Tile &d);
+
 };
+
+Tile& Tile::operator=(const Tile &d)
+{
+    this->adjacentTiles = d.adjacentTiles;
+
+    this->isRevealed = d.isRevealed;
+
+    this->x_pos = d.x_pos;
+
+    this->y_pos = y_pos;
+
+    this->tileSprite = d.tileSprite;
+
+    this->proxMines = d.proxMines;
+
+    this->hasMine = d.hasMine;
+
+    this->hasFlag = d.hasFlag;
+
+    return *this;
+}
+
 
 Tile::Tile()
 {
+    proxMines = 0;
+
+    x_pos = 0;
+
+    y_pos = 0;
+
     hasMine = false;
 
     hasFlag = false;
+
+    isRevealed = false;
+
+    tileNum = 0;
 }
 
 class Board
@@ -65,14 +109,22 @@ Board::Board(int width, int height)
 {
     vector<Tile> tempTiles;
 
+    int count = 0;
+
     for (int i = 0; i < ((height - 88) / 32); i++)
     {
         for (int j = 0; j < (width / 32); j++)
         {
             Tile temp = Tile();
 
+            temp.tileNum = count;
+
+            count++;
+
             tempTiles.push_back(temp);
         }
+
+        count = 0;
 
         Tiles.push_back(tempTiles);
     }
