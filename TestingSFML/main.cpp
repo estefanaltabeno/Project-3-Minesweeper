@@ -85,22 +85,29 @@ bool CheckForCopies(Sprite check, vector<Sprite>& sprites)
 
     Vector2f checkVector = check.getPosition();
 
+    float x = checkVector.x;
+
+    float y = checkVector.y;
+
     for (int i = 0; i < sprites.size(); i++)
     {
         vector = sprites.at(i).getPosition();
 
-        if (sprites.at(i).getPosition() == check.getPosition())
+        if (x >= vector.x && x < vector.x + 32)
         {
-            sprites.erase(sprites.begin() + i);
+            if (y >= vector.y && y < vector.y + 32)
+            {
+                sprites.erase(sprites.begin() + i);
 
-            return true;
+                return true;
+            }
         }
     }
 
     return false;
 }
 
-bool CheckIfRevealed(Sprite& sprite, Board& board, Texture& revealed)
+bool CheckIfRevealed(Sprite& sprite, Board& board)
 {
     Vector2f vectorSprite = sprite.getPosition();
 
@@ -120,7 +127,7 @@ bool CheckIfRevealed(Sprite& sprite, Board& board, Texture& revealed)
             {
                 if (y >= vectorAgainst.y && y < vectorAgainst.y + 32)
                 {
-                    if (board.Tiles.at(i).at(j).tileSprite.getTexture() == &revealed)
+                    if (board.Tiles.at(i).at(j).isRevealed)
                     {
                         return true;
                     }
@@ -150,33 +157,6 @@ void SetRandomMines(Board& board, int height, int width, int mineCount)
         board.Tiles.at(indexes.at(0)).at(indexes.at(1)).hasMine = true;
     }
 }
-
-
-/*
-int SearchForFlag(Board& board, vector<int>& indexes, vector<Sprite>& flags)
-{
-    Vector2f vectorTile = board.Tiles.at(indexes.at(0)).at(indexes.at(1)).tileSprite.getPosition();
-
-    Vector2f compareVector;
-
-    for (int i = 0; i < flags.size(); i++)
-    {
-        compareVector = flags.at(i).getPosition();
-
-        if (vectorTile.x == compareVector.x)
-        {
-            if (vectorTile.y == compareVector.y)
-            {
-                return i;
-            }
-        }
-    }
-
-    return 0;
-}
-*/
-
-//Don't need this anymore
 
 
 void SetProxNumbers(Board& board, int width, int height)
@@ -214,289 +194,125 @@ void SetProxNumbers(Board& board, int width, int height)
 
 }
 
-/*
-bool RevealingLoop(Board& board, Tile tile, vector<Sprite>& proxNumSprites, Texture& revealedTile, Texture& numOne, Texture& numTwo, Texture& numThree, Texture& numFour, Texture& numFive, Texture& numSix, Texture& numSeven, Texture& numEight)
+
+
+vector<Sprite> SetDigitRect(int height, int width, Sprite& zero, Sprite& one, Sprite& two, Sprite& three, Sprite& four, Sprite& five, Sprite& six, Sprite& seven, Sprite& eight, Sprite& nine, Sprite& negativeSign, int mineCount)
 {
-    vector<int> indexes;
+    bool isNeg = false;
 
-    vector<Tile> tiles;
+    vector<Sprite> countDigits;
 
-    tiles.push_back(tile);
+    float x_pos = 21;
 
-    Sprite temp;
+    float y_pos = height - 88;
 
-    bool changeTile = false;
-
-    for (int i = 0; i < tiles.size(); i++)
+    if (mineCount < 0)
     {
-        Tile tileTemp = tiles.at(i);
+        countDigits.push_back(negativeSign);
 
-        for (int j = 0; j < tileTemp.adjacentTiles.size(); j++)
+        mineCount *= -1;
+
+        isNeg = true;
+    }
+
+    if (mineCount < 100)
+    {
+        countDigits.push_back(zero);
+    }
+
+    if (mineCount < 10)
+    {
+        countDigits.push_back(zero);
+    }
+
+    string temp = to_string(mineCount);
+
+    string tempNum = "";
+
+    for (int i = 0; i < temp.size(); i++)
+    {
+        tempNum = "";
+
+        tempNum.push_back(temp.at(i));
+
+        int digit = stoi(tempNum);
+
+        if (digit == 1)
         {
-            if (tileTemp.adjacentTiles.at(j) == nullptr)
-            {
+            countDigits.push_back(one);
+        }
 
-            }
+        else if (digit == 2)
+        {
+            countDigits.push_back(two);
+        }
 
-            else
-            {
-                indexes = SearchForTile(board, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().x, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().y);
+        else if (digit == 3)
+        {
+            countDigits.push_back(three);
+        }
 
-                setTextures(board, revealedTile, indexes);
+        else if (digit == 4)
+        {
+            countDigits.push_back(four);
+        }
 
-                switch(tileTemp.adjacentTiles.at(j)->proxMines)
-                {
-                    case 0:
-                        changeTile = true;
-                        break;
-                    case 1:
-                        temp = setTextures(board, indexes, numOne);
-                        break;
-                    case 2:
-                        temp = setTextures(board, indexes, numTwo);
-                        break;
-                    case 3:
-                        temp = setTextures(board, indexes, numThree);
-                        break;
-                    case 4:
-                        temp = setTextures(board, indexes, numFour);
-                        break;
-                    case 5:
-                        temp = setTextures(board, indexes, numFive);
-                        break;
-                    case 6:
-                        temp = setTextures(board, indexes, numSix);
-                        break;
-                    case 7:
-                        temp = setTextures(board, indexes, numSeven);
-                        break;
-                    case 8:
-                        temp = setTextures(board, indexes, numEight);
-                        break;
-                }
+        else if (digit == 5)
+        {
+            countDigits.push_back(five);
+        }
 
-                proxNumSprites.push_back(temp);
-            }
+        else if (digit == 6)
+        {
+            countDigits.push_back(six);
+        }
+
+        else if (digit == 7)
+        {
+            countDigits.push_back(seven);
+        }
+
+        else if (digit == 8)
+        {
+            countDigits.push_back(eight);
+        }
+
+        else if (digit == 9)
+        {
+            countDigits.push_back(nine);
+        }
+
+        else if (digit == 0)
+        {
+            countDigits.push_back(zero);
         }
     }
 
-
-    if (changeTile)
+    for (int i = 0; i < countDigits.size(); i++)
     {
+        if (isNeg)
+        {
+            countDigits.at(i).setPosition(0, y_pos);
 
-        RevealingLoop(board, )
+            isNeg = false;
+        }
+
+        else
+        {
+            countDigits.at(i).setPosition(x_pos, y_pos);
+
+            x_pos += 21;
+        }
     }
 
-    else
-    {
-        return false;
-    }
+    return countDigits;
 }
-*/
 
-int main()
+void SetPositionsandNeighbors(Board& board, int widthCalc, int heightCalc, Texture& tile)
 {
-    //Reading in Data
-
-    string widthS;
-
-    string heightS;
-
-    string mineCountS;
-
-    int tileCount = 0;
-
-    ifstream file ("config.cfg");
-
-    getline(file, widthS, '\n');
-
-    getline(file, heightS,'\n');
-
-    getline(file, mineCountS, '\n');
-
-    int width = stoi(widthS);
-
-    int height = stoi(heightS);
-
-    int mineCount = stoi(mineCountS);
-
-    tileCount = width * height;
-
-    width *= 32;
-
-    height = (height * 32) + 88;
-
-    //End of reading data
-
-
-
-    //The numbers in the video mode function arguments are by pixels, not any other units
-
-    RenderWindow window (VideoMode(width, height), "The window for now");
-
-    Board board = Board(width, height);
-
-    //Loaded in a window and a board given the config file input
-
-    Texture numOne;
-
-    numOne.loadFromFile("number_1.png");
-
-    Texture numTwo;
-
-    numTwo.loadFromFile("number_2.png");
-
-    Texture numThree;
-
-    numThree.loadFromFile("number_3.png");
-
-    Texture numFour;
-
-    numFour.loadFromFile("number_4.png");
-
-    Texture numFive;
-
-    numFive.loadFromFile("number_5.png");
-
-    Texture numSix;
-
-    numSix.loadFromFile("number_6.png");
-
-    Texture numSeven;
-
-    numSeven.loadFromFile("number_7.png");
-
-    Texture numEight;
-
-    numEight.loadFromFile("number_8.png");
-
-
-
-    Texture tile;
-
-    tile.loadFromFile("tile_hidden.png");
-
-    Texture revealedTile;
-
-    revealedTile.loadFromFile("tile_revealed.png");
-
-    Texture mine;
-
-    mine.loadFromFile("mine.png");
-
-    Texture flagT;
-
-    flagT.loadFromFile("flag.png");
-
-    Texture smileyFace;
-
-    smileyFace.loadFromFile("face_happy.png");
-
-    Texture xFace;
-
-    xFace.loadFromFile("face_lose.png");
-
-    Texture debugT;
-
-    debugT.loadFromFile("debug.png");
-
-    Texture testone;
-
-    testone.loadFromFile("test_1.png");
-
-    Texture testtwo;
-
-    testtwo.loadFromFile("test_2.png");
-
-    Texture testthree;
-
-    testthree.loadFromFile("test_3.png");
-
-
-    //End of Textures
-
-    Sprite smileySprite;
-
-    smileySprite.setTexture(smileyFace);
-
-    smileySprite.setPosition(width - 384, height - 88);
-
-    Sprite xFaceSprite;
-
-    xFaceSprite.setTexture(xFace);
-
-    xFaceSprite.setPosition(width - 384, height - 88);
-
-    Sprite debugS;
-
-    debugS.setTexture(debugT);
-
-    debugS.setPosition(width - 256, height - 88);
-
-    Sprite testoneS;
-
-    testoneS.setTexture(testone);
-
-    testoneS.setPosition(width - 192, height - 88);
-
-    Sprite testTwo;
-
-    testTwo.setTexture(testtwo);
-
-    testTwo.setPosition(width - 128, height - 88);
-
-    Sprite testThree;
-
-    testThree.setTexture(testthree);
-
-    testThree.setPosition(width - 64, height - 88);
-
-    /*
-
-    Sprite numOneSprite;
-
-    numOneSprite.setTexture(numOne);
-
-    Sprite numTwoSprite;
-
-    numTwoSprite.setTexture(numTwo);
-
-    Sprite numThreeSprite;
-
-    numThreeSprite.setTexture(numThree);
-
-    Sprite numFourSprite;
-
-    numFourSprite.setTexture(numFour);
-
-    Sprite numFiveSprite;
-
-    numFiveSprite.setTexture(numFive);
-
-    Sprite numSixSprite;
-
-    numSixSprite.setTexture(numSix);
-
-    Sprite numSevenSprite;
-
-    numSevenSprite.setTexture(numSeven);
-
-    Sprite numEightSprite;
-
-    numEightSprite.setTexture(numEight);
-
-
-    */
-
-    //Lots of texture and sprites here
-
     float x_pos = 0;
 
     float y_pos = 0;
-
-    int widthCalc = (width / 32) - 1;
-
-    int heightCalc = ((height - 88) / 32) - 1;
 
     for (int i = 0; i < heightCalc + 1; i++)
     {
@@ -734,6 +550,302 @@ int main()
 
         y_pos += 32;
     }
+}
+
+void ResetAll(Board& board, int width, int height, int& mineCount, int& finalMineCount, bool& check, bool& printMine, bool& remove, bool& checkIfRevealed, bool& yaWon, vector<Sprite>& flagSprites, vector<Sprite>& mineSprites, vector<Sprite>& proxNumSprites, vector<Sprite>& flagOverMines, int widthCalc, int heightCalc, Texture& tile, int& winCount, vector<Sprite>& debugModeMines)
+{
+    mineCount = finalMineCount;
+
+    board = Board(width, height);
+
+    SetPositionsandNeighbors(board, widthCalc, heightCalc, tile);
+
+    SetRandomMines(board, height, width, mineCount);
+
+    SetProxNumbers(board, widthCalc, heightCalc);
+
+    check = false;
+
+    printMine = false;
+
+    remove = false;
+
+    checkIfRevealed = false;
+
+    yaWon = false;
+
+    winCount = 0;
+
+    flagSprites.clear();
+
+    mineSprites.clear();
+
+    proxNumSprites.clear();
+
+    flagOverMines.clear();
+
+    debugModeMines.clear();
+}
+
+void ReadInBoard(Board& board, int& width, int& height, int& mineCount, int& finalMineCount, bool& check, bool& printMine, bool& remove, bool& checkIfRevealed, bool& yaWon, vector<Sprite>& flagSprites, vector<Sprite>& mineSprites, vector<Sprite>& proxNumSprites, vector<Sprite> flagOverMines, int& widthCalc, int& heightCalc, Texture& tile, int& winCount, vector<Sprite>& debugModeMines, string name)
+{
+    ResetAll(board, width, height, mineCount, finalMineCount, check, printMine, remove, checkIfRevealed, yaWon, flagSprites, mineSprites, proxNumSprites, flagOverMines, widthCalc, heightCalc, tile, winCount, debugModeMines);
+
+    ifstream file(name);
+
+    vector<vector<int>> indexesOfMines;
+
+    vector<int> currentIndexes;
+
+    string tempString;
+
+    int count = 0;
+
+    int mines = 0;
+
+    while(getline(file, tempString, '\n'))
+    {
+        for (int i = 0; i < tempString.size(); i++)
+        {
+            if (tempString.at(i) == '1')
+            {
+                mines++;
+
+                currentIndexes.push_back(count);
+
+                currentIndexes.push_back(i);
+            }
+        }
+
+        indexesOfMines.push_back(currentIndexes);
+
+        count++;
+    }
+
+    widthCalc = tempString.size();
+
+    heightCalc = count;
+
+    width = widthCalc * 32;
+
+    height = ((heightCalc * 32 ) + 88);
+
+    board = Board(width, height);
+
+    for (int i = 0; i < indexesOfMines.size(); i++)
+    {
+        board.Tiles.at(indexesOfMines.at(i).at(0)).at(indexesOfMines.at(i).at(1)).hasMine = true;
+    }
+
+    mineCount = mines;
+
+    SetPositionsandNeighbors(board, widthCalc - 1, heightCalc - 1, tile);
+
+    SetProxNumbers(board, widthCalc - 1, heightCalc - 1);
+
+}
+
+int main()
+{
+    //Reading in Data
+
+    string widthS;
+
+    string heightS;
+
+    string mineCountS;
+
+    int tileCount = 0;
+
+    ifstream file ("config.cfg");
+
+    getline(file, widthS, '\n');
+
+    getline(file, heightS,'\n');
+
+    getline(file, mineCountS, '\n');
+
+    int width = stoi(widthS);
+
+    int height = stoi(heightS);
+
+    int mineCount = stoi(mineCountS);
+
+    tileCount = width * height;
+
+    width *= 32;
+
+    height = (height * 32) + 88;
+
+    int finalMineCount = mineCount;
+
+    //End of reading data
+
+
+
+    //The numbers in the video mode function arguments are by pixels, not any other units
+
+    RenderWindow window (VideoMode(width, height), "Minesweeper");
+
+    Board board = Board(width, height);
+
+    //Loaded in a window and a board given the config file input
+
+    Texture numOne;
+
+    numOne.loadFromFile("number_1.png");
+
+    Texture numTwo;
+
+    numTwo.loadFromFile("number_2.png");
+
+    Texture numThree;
+
+    numThree.loadFromFile("number_3.png");
+
+    Texture numFour;
+
+    numFour.loadFromFile("number_4.png");
+
+    Texture numFive;
+
+    numFive.loadFromFile("number_5.png");
+
+    Texture numSix;
+
+    numSix.loadFromFile("number_6.png");
+
+    Texture numSeven;
+
+    numSeven.loadFromFile("number_7.png");
+
+    Texture numEight;
+
+    numEight.loadFromFile("number_8.png");
+
+
+
+    Texture digits;
+
+    digits.loadFromFile("digits.png");
+
+    Sprite digitSprite;
+
+    digitSprite.setTexture(digits);
+
+    Sprite digitZero = digitSprite;
+
+    Sprite digitOne = digitSprite;
+
+    Sprite digitTwo = digitSprite;
+
+    Sprite digitThree = digitSprite;
+
+    Sprite digitFour = digitSprite;
+
+    Sprite digitFive = digitSprite;
+
+    Sprite digitSix = digitSprite;
+
+    Sprite digitSeven = digitSprite;
+
+    Sprite digitEight = digitSprite;
+
+    Sprite digitNine = digitSprite;
+
+    Sprite negativeSign = digitSprite;
+
+
+
+
+    Texture tile;
+
+    tile.loadFromFile("tile_hidden.png");
+
+    Texture revealedTile;
+
+    revealedTile.loadFromFile("tile_revealed.png");
+
+    Texture mine;
+
+    mine.loadFromFile("mine.png");
+
+    Texture flagT;
+
+    flagT.loadFromFile("flag.png");
+
+    Texture smileyFace;
+
+    smileyFace.loadFromFile("face_happy.png");
+
+    Texture xFace;
+
+    xFace.loadFromFile("face_lose.png");
+
+    Texture shadesFace;
+
+    shadesFace.loadFromFile("face_win.png");
+
+    Texture debugT;
+
+    debugT.loadFromFile("debug.png");
+
+    Texture testone;
+
+    testone.loadFromFile("test_1.png");
+
+    Texture testtwo;
+
+    testtwo.loadFromFile("test_2.png");
+
+    Texture testthree;
+
+    testthree.loadFromFile("test_3.png");
+
+
+    //End of Textures
+
+    Sprite smileySprite;
+
+    smileySprite.setTexture(smileyFace);
+
+
+    Sprite xFaceSprite;
+
+    xFaceSprite.setTexture(xFace);
+
+
+    Sprite shadeFace;
+
+    shadeFace.setTexture(shadesFace);
+
+    Sprite debugS;
+
+    debugS.setTexture(debugT);
+
+
+    Sprite testoneS;
+
+    testoneS.setTexture(testone);
+
+
+    Sprite testTwo;
+
+    testTwo.setTexture(testtwo);
+
+
+    Sprite testThree;
+
+    testThree.setTexture(testthree);
+
+
+    //Lots of texture and sprites here
+
+    int widthCalc = (width / 32) - 1;
+
+    int heightCalc = ((height - 88) / 32) - 1;
+
+    SetPositionsandNeighbors(board, widthCalc, heightCalc, tile);
 
     //Working through the board's Tiles vector and setting the positions of each to make sense. Also doing it here to avoid issues with the texture pointers and whatnot
 
@@ -745,6 +857,10 @@ int main()
     bool remove = false;
 
     bool checkIfRevealed = false;
+
+    bool yaWon = false;
+
+    bool debugMode = false;
 
     Sprite temp;
 
@@ -758,17 +874,23 @@ int main()
 
     vector<Sprite> proxNumSprites;
 
+    vector<Sprite> flagOverMines;
+
+    vector<Sprite> debugModeMines;
+
     vector<int> indexess;
 
     vector<Tile> tilesWith0Prox;
 
-    bool keepGoing = true;
+    vector<Sprite> mineCountSprites;
 
     SetRandomMines(board, height, width, mineCount);
 
     //WORKING ON THIS SETTING THE NUMBERS AND THEIR PROXIMITY TO THE MINES THAT I SET WITH THE FUNCTION PRIOR
 
     SetProxNumbers(board, widthCalc, heightCalc);
+
+    int winCount = 0;
 
     while(window.isOpen())
     {
@@ -786,6 +908,47 @@ int main()
                 }
             }
 
+            //I know my code is messy and trust me, I know. I'm not doing this project last minute, I've been working at this
+            //for the past week but since I'm now on a time crunch, I'm getting messy. I'm sorry! I would normally put everything in functions and
+            //make it neat but I don't have the time!
+
+            digitSprite.setPosition(21, height - 88);
+
+            digitZero.setTextureRect(IntRect(0, 0, 21, 32));
+
+            digitOne.setTextureRect(IntRect(22, 0, 21, 32));
+
+            digitTwo.setTextureRect(IntRect(43, 0, 21, 32));
+
+            digitThree.setTextureRect(IntRect(64, 0, 21, 32));
+
+            digitFour.setTextureRect(IntRect(85, 0, 21, 32));
+
+            digitFive.setTextureRect(IntRect(106, 0, 21, 32));
+
+            digitSix.setTextureRect(IntRect(127, 0, 21, 32));
+
+            digitSeven.setTextureRect(IntRect(148, 0, 21, 32));
+
+            digitEight.setTextureRect(IntRect(169, 0, 21, 32));
+
+            digitNine.setTextureRect(IntRect(190, 0, 21, 32));
+
+            negativeSign.setTextureRect(IntRect(211, 0, 21, 32));
+
+            smileySprite.setPosition(width - 384, height - 88);
+
+            xFaceSprite.setPosition(width - 384, height - 88);
+
+            shadeFace.setPosition(width - 384, height - 88);
+
+            debugS.setPosition(width - 256, height - 88);
+
+            testoneS.setPosition(width - 192, height - 88);
+
+            testTwo.setPosition(width - 128, height - 88);
+
+            testThree.setPosition(width - 64, height - 88);
 
             window.draw(debugS);
 
@@ -798,15 +961,81 @@ int main()
             switch (event.type)
             {
                 case Event::Closed:
-                    cout << "We closed " << endl;
                     window.close();
-                    break;
-                case Event::KeyPressed:
                     break;
                 case Event::MouseButtonPressed:
                     if (event.mouseButton.button == Mouse::Left)
                     {
+                        //Smiley Face Sprite
+
+                        if (event.mouseButton.x >= width - 384 && event.mouseButton.x < width - 320)
+                        {
+                            if (event.mouseButton.y >= height - 88 && event.mouseButton.y < height)
+                            {
+                                ResetAll(board, width, height, mineCount, finalMineCount, check, printMine, remove, checkIfRevealed, yaWon, flagSprites, mineSprites, proxNumSprites, flagOverMines, widthCalc, heightCalc, tile, winCount, debugModeMines);
+
+                                continue;
+                            }
+                        }
+
+                        //Test 1 Button
+                        if (event.mouseButton.x >= width - 192 && event.mouseButton.x < width - 128)
+                        {
+                            if(event.mouseButton.y >= height - 88 && event.mouseButton.y < height)
+                            {
+                                ReadInBoard(board, width, height, mineCount, finalMineCount, check, printMine, remove, checkIfRevealed, yaWon, flagSprites, mineSprites, proxNumSprites, flagOverMines, widthCalc, heightCalc, tile, winCount, debugModeMines, "testboard1.brd");
+
+                                continue;
+                            }
+                        }
+
+                        if (printMine || yaWon)
+                        {
+                            if (event.mouseButton.x >= width - 384 && event.mouseButton.x < width - 320)
+                            {
+                                if (event.mouseButton.y >= height - 88 && event.mouseButton.y < height)
+                                {
+                                    ResetAll(board, width, height, mineCount, finalMineCount, check, printMine, remove, checkIfRevealed, yaWon, flagSprites, mineSprites, proxNumSprites, flagOverMines, widthCalc, heightCalc, tile, winCount, debugModeMines);
+
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (winCount == (tileCount - mineCount))
+                        {
+                            yaWon = true;
+
+                            continue;
+                        }
+
+                        //Debug Button
+                        if (event.mouseButton.x >= width - 256 && event.mouseButton.x < width - 192)
+                        {
+                            if (event.mouseButton.y >= height - 88 && event.mouseButton.y < height)
+                            {
+                                if (debugMode)
+                                {
+                                    debugMode = false;
+                                }
+
+                                else
+                                {
+                                    debugMode = true;
+                                }
+
+                                continue;
+                            }
+                        }
+
+                        //width - 384, height - 88
+
                         tempIndexes = SearchForTile(board, event.mouseButton.x, event.mouseButton.y);
+
+                        if (printMine || yaWon)
+                        {
+                            //Do nothing, game's over.
+                        }
 
                         if (board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasFlag)
                         {
@@ -836,6 +1065,8 @@ int main()
 
                             else
                             {
+                                winCount++;
+
                                 tilesWith0Prox.clear();
 
                                 int countMine = board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).proxMines;
@@ -852,10 +1083,6 @@ int main()
 
                                     for (int i = 0; i < sizeCount; i++)
                                     {
-                                        cout << "New one " << endl;
-
-                                        cout << tilesWith0Prox.at(i).tileNum << endl;
-
                                         for (int j = 0; j < tilesWith0Prox.at(i).adjacentTiles.size(); j++)
                                         {
                                             if (tilesWith0Prox.at(i).adjacentTiles.at(j) == nullptr)
@@ -868,9 +1095,16 @@ int main()
                                                 continue;
                                             }
 
+                                            else if (tilesWith0Prox.at(i).adjacentTiles.at(j)->hasFlag)
+                                            {
+                                                continue;
+                                            }
+
                                             else
                                             {
                                                 indexess = SearchForTile(board, tilesWith0Prox.at(i).adjacentTiles.at(j)->tileSprite.getPosition().x, tilesWith0Prox.at(i).adjacentTiles.at(j)->tileSprite.getPosition().y);
+
+                                                winCount++;
 
                                                 setTextures(board, revealedTile, indexess);
 
@@ -880,8 +1114,6 @@ int main()
 
                                                 if (proxMines == 0)
                                                 {
-                                                    cout << indexess.at(0) << " 0 and 1 " << indexess.at(1) << endl;
-
                                                     tilesWith0Prox.push_back(board.Tiles.at(indexess.at(0)).at(indexess.at(1)));
 
                                                     sizeCount++;
@@ -990,6 +1222,13 @@ int main()
 
                     else if (event.mouseButton.button == Mouse::Right)
                     {
+                        if (printMine || yaWon)
+                        {
+                            //Do nothing again, game's over.
+
+                            continue;
+                        }
+
                         check = true;
 
                         tempIndexes = SearchForTile(board, event.mouseButton.x, event.mouseButton.y);
@@ -998,18 +1237,32 @@ int main()
 
                         remove = CheckForCopies(temp, flagSprites);
 
-                        checkIfRevealed = CheckIfRevealed(temp, board, revealedTile);
+                        checkIfRevealed = CheckIfRevealed(temp, board);
 
-                        if (remove || checkIfRevealed)
+                        if (remove)
                         {
+                            mineCount++;
+
                             board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasFlag = false;
+
+                            bool dontNeed = CheckForCopies(temp, flagSprites);
 
                             //Do nothing which is perfect
                         }
 
+                        else if (checkIfRevealed)
+                        {
+                            board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasFlag = false;
+
+                            bool dontNeed = CheckForCopies(temp, flagSprites);
+                        }
+
                         else
                         {
+                            mineCount--;
+
                             flagSprites.push_back(temp);
+
                             board.Tiles.at(tempIndexes.at(0)).at(tempIndexes.at(1)).hasFlag = true;
                         }
                     }
@@ -1018,16 +1271,40 @@ int main()
                     break;
             }
 
-            if (check)
+
+            for (const auto& x : flagSprites)
             {
-                for (const auto& x : flagSprites)
-                {
-                    window.draw(x);
-                }
+                window.draw(x);
             }
 
-            else if (printMine)
+
+            window.draw(smileySprite);
+
+            if (printMine)
             {
+                for (int i = 0; i < board.Tiles.size(); i++)
+                {
+                    for (int j = 0; j < board.Tiles.at(i).size(); j++)
+                    {
+                        if (board.Tiles.at(i).at(j).hasMine)
+                        {
+                            board.Tiles.at(i).at(j).isRevealed = true;
+
+                            board.Tiles.at(i).at(j).tileSprite.setTexture(revealedTile);
+
+                            vector<int> tempIndex;
+
+                            tempIndex.push_back(i);
+
+                            tempIndex.push_back(j);
+
+                            temp = setTextures(board, tempIndex, mine);
+
+                            mineSprites.push_back(temp);
+                        }
+                    }
+                }
+
                 for (const auto& x: mineSprites)
                 {
                     window.draw(x);
@@ -1036,9 +1313,78 @@ int main()
                 window.draw(xFaceSprite);
             }
 
-            else
+            if (yaWon)
             {
+                for (int i = 0; i < board.Tiles.size(); i++)
+                {
+                    for (int j = 0; j < board.Tiles.at(i).size(); j++)
+                    {
+                        if (board.Tiles.at(i).at(j).hasMine)
+                        {
+                            board.Tiles.at(i).at(j).isRevealed = false;
+
+                            //board.Tiles.at(i).at(j).tileSprite.setTexture(revealedTile);
+
+                            vector<int> tempIndex;
+
+                            tempIndex.push_back(i);
+
+                            tempIndex.push_back(j);
+
+                            temp = setTextures(board, tempIndex, flagT);
+
+                            flagOverMines.push_back(temp);
+                        }
+                    }
+                }
+
+                for (const auto& x: flagOverMines)
+                {
+                    window.draw(x);
+                }
+
+                window.draw(shadeFace);
+            }
+
+            if (debugMode)
+            {
+                for (int i = 0; i < board.Tiles.size(); i++)
+                {
+                    for (int j = 0; j < board.Tiles.at(i).size(); j++)
+                    {
+                        if (board.Tiles.at(i).at(j).hasMine)
+                        {
+                            board.Tiles.at(i).at(j).isRevealed = false;
+
+                            //board.Tiles.at(i).at(j).tileSprite.setTexture(revealedTile);
+
+                            vector<int> tempIndex;
+
+                            tempIndex.push_back(i);
+
+                            tempIndex.push_back(j);
+
+                            temp = setTextures(board, tempIndex, mine);
+
+                            debugModeMines.push_back(temp);
+                        }
+                    }
+                }
+
+                for (auto& x : debugModeMines)
+                {
+                    window.draw(x);
+                }
+
                 window.draw(smileySprite);
+
+            }
+
+            mineCountSprites = SetDigitRect(height, width, digitZero, digitOne, digitTwo, digitThree, digitFour, digitFive, digitSix, digitSeven, digitEight, digitNine, negativeSign, mineCount);
+
+            for (auto& x : mineCountSprites)
+            {
+                window.draw(x);
             }
 
             for (const auto& x : proxNumSprites)
@@ -1053,6 +1399,112 @@ int main()
 
     return 0;
 }
+
+/*
+int SearchForFlag(Board& board, vector<int>& indexes, vector<Sprite>& flags)
+{
+    Vector2f vectorTile = board.Tiles.at(indexes.at(0)).at(indexes.at(1)).tileSprite.getPosition();
+
+    Vector2f compareVector;
+
+    for (int i = 0; i < flags.size(); i++)
+    {
+        compareVector = flags.at(i).getPosition();
+
+        if (vectorTile.x == compareVector.x)
+        {
+            if (vectorTile.y == compareVector.y)
+            {
+                return i;
+            }
+        }
+    }
+
+    return 0;
+}
+*/
+
+//Don't need this anymore
+
+/*
+bool RevealingLoop(Board& board, Tile tile, vector<Sprite>& proxNumSprites, Texture& revealedTile, Texture& numOne, Texture& numTwo, Texture& numThree, Texture& numFour, Texture& numFive, Texture& numSix, Texture& numSeven, Texture& numEight)
+{
+    vector<int> indexes;
+
+    vector<Tile> tiles;
+
+    tiles.push_back(tile);
+
+    Sprite temp;
+
+    bool changeTile = false;
+
+    for (int i = 0; i < tiles.size(); i++)
+    {
+        Tile tileTemp = tiles.at(i);
+
+        for (int j = 0; j < tileTemp.adjacentTiles.size(); j++)
+        {
+            if (tileTemp.adjacentTiles.at(j) == nullptr)
+            {
+
+            }
+
+            else
+            {
+                indexes = SearchForTile(board, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().x, tileTemp.adjacentTiles.at(j)->tileSprite.getPosition().y);
+
+                setTextures(board, revealedTile, indexes);
+
+                switch(tileTemp.adjacentTiles.at(j)->proxMines)
+                {
+                    case 0:
+                        changeTile = true;
+                        break;
+                    case 1:
+                        temp = setTextures(board, indexes, numOne);
+                        break;
+                    case 2:
+                        temp = setTextures(board, indexes, numTwo);
+                        break;
+                    case 3:
+                        temp = setTextures(board, indexes, numThree);
+                        break;
+                    case 4:
+                        temp = setTextures(board, indexes, numFour);
+                        break;
+                    case 5:
+                        temp = setTextures(board, indexes, numFive);
+                        break;
+                    case 6:
+                        temp = setTextures(board, indexes, numSix);
+                        break;
+                    case 7:
+                        temp = setTextures(board, indexes, numSeven);
+                        break;
+                    case 8:
+                        temp = setTextures(board, indexes, numEight);
+                        break;
+                }
+
+                proxNumSprites.push_back(temp);
+            }
+        }
+    }
+
+
+    if (changeTile)
+    {
+
+        RevealingLoop(board, )
+    }
+
+    else
+    {
+        return false;
+    }
+}
+*/
 
 /*
 
@@ -1336,5 +1788,71 @@ int main()
     cout << "We eneded out here." << endl;
 
     return 0;
+}
+*/
+
+/*
+
+
+int lastDigit = 0;
+
+while (mineCount != 0)
+{
+lastDigit = mineCount % 10;
+
+mineCount /= 10;
+
+//using if/else statements since I don't trust switch statements anymore, they act funny at times.
+
+if (lastDigit == 1)
+{
+countDigits.push_back(one);
+}
+
+else if (lastDigit == 2)
+{
+countDigits.push_back(two);
+}
+
+else if (lastDigit == 3)
+{
+countDigits.push_back(three);
+}
+
+else if (lastDigit == 4)
+{
+countDigits.push_back(four);
+}
+
+else if (lastDigit == 5)
+{
+countDigits.push_back(five);
+}
+
+else if (lastDigit == 6)
+{
+countDigits.push_back(six);
+}
+
+else if (lastDigit == 7)
+{
+countDigits.push_back(seven);
+}
+
+else if (lastDigit == 8)
+{
+countDigits.push_back(eight);
+}
+
+else if (lastDigit == 9)
+{
+countDigits.push_back(nine);
+}
+
+else if (lastDigit == 0)
+{
+countDigits.push_back(zero);
+}
+
 }
 */

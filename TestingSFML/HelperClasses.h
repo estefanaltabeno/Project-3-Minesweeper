@@ -127,5 +127,7 @@ Board::Board(int width, int height)
         count = 0;
 
         Tiles.push_back(tempTiles);
+
+        tempTiles.clear();
     }
 }
